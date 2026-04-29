@@ -26,9 +26,14 @@ from .runner import evolve_jpsi, evolve_all_channels
 from .initial_conditions import initial_vector, CHANNELS, F_gamma, braaten_yuan_moment
 from .splitting import (
     gamma_matrix,
-    P_cc, P_cg, P_gc, P_gg,
-    P_photon_c, P_c_photon,
-    S1, beta0,
+    P_cc,
+    P_cg,
+    P_gc,
+    P_gg,
+    P_photon_c,
+    P_c_photon,
+    S1,
+    beta0,
 )
 from .couplings import alpha_s, as_over_2pi
 from .evolution import transfer_matrix, evolve_vector
@@ -45,9 +50,14 @@ __all__ = [
     "braaten_yuan_moment",
     # splitting functions
     "gamma_matrix",
-    "P_cc", "P_cg", "P_gc", "P_gg",
-    "P_photon_c", "P_c_photon",
-    "S1", "beta0",
+    "P_cc",
+    "P_cg",
+    "P_gc",
+    "P_gg",
+    "P_photon_c",
+    "P_c_photon",
+    "S1",
+    "beta0",
     # couplings
     "alpha_s",
     "as_over_2pi",

@@ -30,7 +30,7 @@ def test_gluon_photon_decoupled():
     """Γ_γg = Γ_gγ = 0 at LO — there is no direct photon↔gluon coupling.
     (Indirect γ←c←g mixing is allowed and expected.)"""
     from jpsi_ff.splitting import gamma_matrix
-    import numpy as np
+
     Gamma = gamma_matrix(_N, as_over_2pi=0.05, aem_over_2pi=1e-4, nf=_NF)
     assert abs(Gamma[0, 2]) < 1e-30, "Direct γ←g coupling must vanish"
     assert abs(Gamma[2, 0]) < 1e-30, "Direct g←γ coupling must vanish"
@@ -47,7 +47,9 @@ def test_charm_sources_photon():
 def test_convergence_with_steps(n_steps):
     """Transfer matrix must converge as n_steps increases."""
     E_ref = transfer_matrix(_N, _MU2_0, 100.0, _AS_REF, _MU2_0, nf=_NF, n_steps=200)
-    E_test = transfer_matrix(_N, _MU2_0, 100.0, _AS_REF, _MU2_0, nf=_NF, n_steps=n_steps)
+    E_test = transfer_matrix(
+        _N, _MU2_0, 100.0, _AS_REF, _MU2_0, nf=_NF, n_steps=n_steps
+    )
     # The (c,c) element carries most of the weight
     tol = 5e-2 if n_steps == 10 else 1e-3
     assert abs(E_test[1, 1] - E_ref[1, 1]) / abs(E_ref[1, 1]) < tol

@@ -16,7 +16,9 @@ from .constants import NF
 from .splitting import beta0
 
 
-def alpha_s(alpha_s_ref: float, mu2_ref: float, mu2: float | np.ndarray, nf: int = NF) -> float | np.ndarray:
+def alpha_s(
+    alpha_s_ref: float, mu2_ref: float, mu2: float | np.ndarray, nf: int = NF
+) -> float | np.ndarray:
     r"""LO running strong coupling αs(μ²).
 
     Parameters
@@ -40,6 +42,8 @@ def alpha_s(alpha_s_ref: float, mu2_ref: float, mu2: float | np.ndarray, nf: int
     return alpha_s_ref / (1.0 + (b0 / (2.0 * np.pi)) * alpha_s_ref * lmu)
 
 
-def as_over_2pi(alpha_s_ref: float, mu2_ref: float, mu2: float | np.ndarray, nf: int = NF) -> float | np.ndarray:
+def as_over_2pi(
+    alpha_s_ref: float, mu2_ref: float, mu2: float | np.ndarray, nf: int = NF
+) -> float | np.ndarray:
     """Return αs(μ²) / (2π), the coefficient that multiplies P̃ in DGLAP."""
     return alpha_s(alpha_s_ref, mu2_ref, mu2, nf) / (2.0 * np.pi)

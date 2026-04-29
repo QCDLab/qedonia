@@ -103,5 +103,7 @@ def evolve_vector(
     numpy.ndarray, shape (3,)
         Evolved vector at ``mu2_to``.
     """
-    E = transfer_matrix(N, mu2_from, mu2_to, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps)
+    E = transfer_matrix(
+        N, mu2_from, mu2_to, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps
+    )
     return E @ np.asarray(D0, dtype=complex)

@@ -51,7 +51,7 @@ def contour_nodes(
     t_vals = np.linspace(0.0, T, n_nodes)
     dt = T / (n_nodes - 1)
     weights = np.full(n_nodes, dt / np.pi)
-    weights[0] *= 0.5   # trapezoidal endpoint correction
+    weights[0] *= 0.5  # trapezoidal endpoint correction
     weights[-1] *= 0.5
     return (c + 1j * t_vals).astype(complex), weights
 

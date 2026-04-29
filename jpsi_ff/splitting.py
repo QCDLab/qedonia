@@ -44,6 +44,7 @@ def beta0(nf: int = NF) -> float:
 # QCD splitting functions
 # ---------------------------------------------------------------------------
 
+
 def P_cc(N: complex) -> complex:
     r"""P̃_{q→q}(N) = CF [3 − 2 S₁(N) + 1/(N(N+1))].  (eq. MPqq)"""
     return CF * (3.0 - 2.0 * S1(N) + 1.0 / (N * (N + 1.0)))
@@ -74,6 +75,7 @@ def P_gg(N: complex, nf: int = NF) -> complex:
 # QED splitting functions  (both include ec² = (2/3)²)
 # ---------------------------------------------------------------------------
 
+
 def P_photon_c(N: complex) -> complex:
     r"""P̃_{γ→c}(N) = ec² [1/N − 2/(N+1) + 2/(N+2)].  (eq. MPgaq with eq=ec)"""
     return EC2 * (1.0 / N - 2.0 / (N + 1.0) + 2.0 / (N + 2.0))
@@ -87,6 +89,7 @@ def P_c_photon(N: complex) -> complex:
 # ---------------------------------------------------------------------------
 # Full 3×3 anomalous-dimension matrix
 # ---------------------------------------------------------------------------
+
 
 def gamma_matrix(
     N: complex,
@@ -124,10 +127,10 @@ def gamma_matrix(
     Gamma = np.zeros((3, 3), dtype=complex)
 
     # Row 0: photon sourced by charm via QED
-    Gamma[0, 1] = aem_over_2pi * P_photon_c(N)   # (α/2π) ec² [...]
+    Gamma[0, 1] = aem_over_2pi * P_photon_c(N)  # (α/2π) ec² [...]
 
     # Row 1: charm sourced by photon (QED) + charm/gluon (QCD)
-    Gamma[1, 0] = aem_over_2pi * P_c_photon(N)   # (α/2π) ec² [...]
+    Gamma[1, 0] = aem_over_2pi * P_c_photon(N)  # (α/2π) ec² [...]
     Gamma[1, 1] = as_over_2pi * P_cc(N)
     Gamma[1, 2] = as_over_2pi * P_cg(N)
 

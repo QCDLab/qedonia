@@ -11,7 +11,7 @@ EC: float = 2.0 / 3.0
 EC2: float = EC**2
 
 # Default physics parameters
-MC_GEV: float = 1.5        # charm quark mass [GeV]
-MU0_OVER_MC: float = 2.0   # μ₀ / mc  (initial fragmentation scale)
-NF: int = 4                 # active flavors at charm scale: u, d, s, c
+MC_GEV: float = 1.5  # charm quark mass [GeV]
+MU0_OVER_MC: float = 2.0  # μ₀ / mc  (initial fragmentation scale)
+NF: int = 4  # active flavors at charm scale: u, d, s, c
 ALPHA_EM: float = 1.0 / 133.0  # QED coupling (fixed at charm scale)

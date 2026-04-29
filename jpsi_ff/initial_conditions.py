@@ -40,6 +40,7 @@ CHANNELS: tuple[str, ...] = ("1S1", "3S18", "1S08", "3PJ8")
 # Building blocks
 # ---------------------------------------------------------------------------
 
+
 def _S1(N: complex) -> complex:
     return digamma(N + 1) + _GAMMA_E
 
@@ -64,6 +65,7 @@ def _zz_moment(N: complex) -> complex:
 # ---------------------------------------------------------------------------
 # Braaten–Yuan integral  B(N)  (eq. BYmoment)
 # ---------------------------------------------------------------------------
+
 
 def _by_integrand_re(z: float, N_re: float, N_im: float) -> float:
     if z <= 0.0:
@@ -107,15 +109,25 @@ def braaten_yuan_moment(N: complex, tol: float = 1e-9) -> complex:
     N_im = N.imag
 
     re_val, _ = quad(
-        _by_integrand_re, 0.0, 1.0,
-        args=(N_re, N_im), limit=200, epsabs=tol, epsrel=tol,
+        _by_integrand_re,
+        0.0,
+        1.0,
+        args=(N_re, N_im),
+        limit=200,
+        epsabs=tol,
+        epsrel=tol,
     )
     if abs(N_im) < 1e-14:
         return complex(re_val)
 
     im_val, _ = quad(
-        _by_integrand_im, 0.0, 1.0,
-        args=(N_re, N_im), limit=200, epsabs=tol, epsrel=tol,
+        _by_integrand_im,
+        0.0,
+        1.0,
+        args=(N_re, N_im),
+        limit=200,
+        epsabs=tol,
+        epsrel=tol,
     )
     return complex(re_val, im_val)
 
@@ -125,6 +137,7 @@ def braaten_yuan_moment(N: complex, tol: float = 1e-9) -> complex:
 # Units: [d̃] · [⟨O⟩] = dimensionless FF,  so [d̃] = 1/[⟨O⟩].
 # ⟨O^{J/ψ}(³S₁^[1,8])⟩  in GeV³,  ⟨O^{J/ψ}(³P_J^[8])⟩  in GeV⁵.
 # ---------------------------------------------------------------------------
+
 
 def d_photon(
     N: complex,
@@ -247,8 +260,11 @@ def initial_vector(
     numpy.ndarray, shape (3,), dtype complex
         [d̃_γ(N), d̃_c(N), d̃_g(N)] for the given channel.
     """
-    return np.array([
-        d_photon(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc),
-        d_charm(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc),
-        d_gluon(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc),
-    ], dtype=complex)
+    return np.array(
+        [
+            d_photon(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc),
+            d_charm(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc),
+            d_gluon(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc),
+        ],
+        dtype=complex,
+    )

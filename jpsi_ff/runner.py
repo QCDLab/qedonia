@@ -107,11 +107,13 @@ def evolve_jpsi(
         raise ValueError(f"component must be 'gamma', 'c', or 'g', got '{component}'")
 
     comp_idx = _COMPONENT_IDX[component]
-    z_arr = np.asarray(z_values if z_values is not None else _default_z_grid(), dtype=float)
+    z_arr = np.asarray(
+        z_values if z_values is not None else _default_z_grid(), dtype=float
+    )
 
     mu2_from = mu_from**2
     mu2_to = mu_to**2
-    mu2_ref = (mu0_over_mc * mc) ** 2   # = mu2_from by convention
+    mu2_ref = (mu0_over_mc * mc) ** 2  # = mu2_from by convention
 
     N_nodes, weights = contour_nodes(mellin_c, mellin_T, mellin_n_nodes)
 
@@ -119,7 +121,9 @@ def evolve_jpsi(
     D_tilde = np.empty(len(N_nodes), dtype=complex)
     for k, N in enumerate(N_nodes):
         D0 = initial_vector(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc)
-        E = transfer_matrix(N, mu2_from, mu2_to, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps)
+        E = transfer_matrix(
+            N, mu2_from, mu2_to, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps
+        )
         D_tilde[k] = (E @ D0)[comp_idx]
 
     D_z = invert_mellin(D_tilde, N_nodes, weights, z_arr)
@@ -151,7 +155,9 @@ def evolve_all_channels(
     z_values : numpy.ndarray
     D_total  : numpy.ndarray
     """
-    z_arr = np.asarray(z_values if z_values is not None else _default_z_grid(), dtype=float)
+    z_arr = np.asarray(
+        z_values if z_values is not None else _default_z_grid(), dtype=float
+    )
     D_total = np.zeros(len(z_arr))
 
     for channel in CHANNELS:

@@ -9,8 +9,11 @@ from scipy.integrate import quad
 from scipy.special import digamma
 
 from jpsi_ff.initial_conditions import (
-    F_gamma, _zz_moment, braaten_yuan_moment, CHANNELS,
-    d_charm, d_gluon,
+    F_gamma,
+    _zz_moment,
+    braaten_yuan_moment,
+    d_charm,
+    d_gluon,
 )
 
 _GAMMA_E = float(-digamma(1))
@@ -25,6 +28,7 @@ _AEM = 1.0 / 133.0
 # Building blocks
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("N", _N_VALUES)
 def test_zz_moment(N):
     """∫₀¹ z^{N-1} z(1-z) dz = 1/[(N+1)(N+2)]."""
@@ -38,12 +42,12 @@ def test_F_gamma(N):
     ln_ratio = np.log(_MU0_OVER_MC**2)
 
     def integrand(z):
-        poly = z ** (N - 1) * (z - z ** 2)            # from (z - z²)
+        poly = z ** (N - 1) * (z - z**2)  # from (z - z²)
         plus = (z ** (N - 1) - 1.0) * z / (1.0 - z)  # from z*(1/(1-z))_+
         return poly + plus
 
     val, _ = quad(integrand, 0.0, 1.0 - 1e-10, limit=200)
-    val += ln_ratio   # δ(1-z) piece from plus-prescription
+    val += ln_ratio  # δ(1-z) piece from plus-prescription
     assert abs(val - F_gamma(N, _MU0_OVER_MC).real) < 1e-8
 
 
@@ -51,9 +55,11 @@ def test_F_gamma(N):
 # Braaten–Yuan moment B(N)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.parametrize("N", _N_VALUES)
 def test_braaten_yuan_real(N):
     """B(N) via quad must match braaten_yuan_moment for integer N."""
+
     def integrand(z):
         poly = 16.0 - 32.0 * z + 72.0 * z**2 - 32.0 * z**3 + 5.0 * z**4
         return z ** (N - 1) * z * (1.0 - z) ** 2 / (2.0 - z) ** 6 * poly
@@ -65,6 +71,7 @@ def test_braaten_yuan_real(N):
 # ---------------------------------------------------------------------------
 # Color-factor ratio: g/c for ³S₁^[8] = 1/4
 # ---------------------------------------------------------------------------
+
 
 def test_color_ratio_3S18():
     """d̃_g^{3S18} / d̃_c^{3S18} = (π αs/24) / (π αs/6) = 1/4."""
@@ -78,6 +85,7 @@ def test_color_ratio_3S18():
 # ---------------------------------------------------------------------------
 # Delta(1-z) channels: d̃^{3S18} is constant in N
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("N1,N2", [(2, 3), (2, 4), (3, 5)])
 def test_3S18_constant_in_N_charm(N1, N2):
@@ -96,6 +104,7 @@ def test_3S18_constant_in_N_gluon(N1, N2):
 # ---------------------------------------------------------------------------
 # Vanishing gluon color-singlet IC
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("N", _N_VALUES)
 def test_gluon_1S1_vanishes(N):
