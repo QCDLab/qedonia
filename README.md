@@ -22,8 +22,8 @@ where the 3×3 anomalous-dimension matrix at LO reads
 
 ```text
 Γ = ⎡     0          (α/2π) P̃_γc       0         ⎤
-    ⎢ (α/2π) P̃_cγ   (αs/2π) P̃_cc   (αs/2π) P̃_cg ⎥
-    ⎣     0          (αs/2π) P̃_gc   (αs/2π) P̃_gg  ⎦
+    ⎢ (α/2π) P̃_cγ   (αs/2π) P̃_cc   (αs/2π) P̃_cg  ⎥
+    ⎣     0         (αs/2π) P̃_gc   (αs/2π) P̃_gg  ⎦
 ```
 
 The evolution operator is computed via the path-ordered iterate-exact method
@@ -67,8 +67,6 @@ The `[dev]` extra installs `pytest` and `matplotlib` for testing and plotting.
 ```bash
 python -m pytest
 ```
-
-All 66 tests should pass.
 
 ---
 
@@ -302,16 +300,3 @@ from qedonia import (
 | z grid | 60 log-spaced in [0.05, 0.99] | Default momentum-fraction grid |
 
 ---
-
-## Running the tests
-
-```bash
-# Run all tests
-pytest
-
-# Run with verbose output
-pytest -v
-
-# Run a specific module
-pytest tests/test_lhapdf_writer.py -v
-```
