@@ -196,6 +196,8 @@ def evolve_ff_grid(
     mellin_c: float = DEFAULT_C,
     mellin_T: float = DEFAULT_T,
     mellin_n_nodes: int = DEFAULT_N_NODES,
+    lanczos: bool = False,
+    lanczos_order: int = 1,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     r"""Compute the evolved J/ψ FF grid for all three components at multiple scales.
 
@@ -227,6 +229,21 @@ def evolve_ff_grid(
         Same meaning as in :func:`evolve_jpsi`.
     mellin_c, mellin_T, mellin_n_nodes :
         Mellin contour parameters.
+    lanczos : bool
+        If True, apply σ-smoothing to the quadrature weights before the
+        Mellin inversion::
+
+            σ(t) = sinc^lanczos_order(t / T)
+
+        This suppresses Gibbs-like ringing from the flat Mellin transforms
+        of the δ(1−z) color-octet initial conditions.
+        ``order=1`` (Lanczos): ~100× ringing reduction, ~1 % signal distortion.
+        ``order=2`` (Fejér): non-negative kernel, zero sidelobes, fully
+        eliminates endpoint ringing at the cost of ~2 % wider main lobe.
+        Recommended whenever the curves will be plotted over a wide z range.
+    lanczos_order : int
+        Exponent of the sinc filter (1 = Lanczos, 2 = Fejér).  Only used
+        when ``lanczos=True``.
 
     Returns
     -------
@@ -280,10 +297,19 @@ def evolve_ff_grid(
             mu2_prev = mu2
 
     # --- Step 3: vectorised Mellin inversion ---
+    # Optionally damp the weights with the Lanczos sigma factor
+    # σ(t) = sinc(t/T) suppresses Gibbs ringing from flat (δ-function) ICs
+    if lanczos:
+        t_vals = np.imag(N_nodes)
+        sigma = np.where(t_vals > 0, np.sinc(t_vals / mellin_T) ** lanczos_order, 1.0)
+        effective_weights = weights * sigma
+    else:
+        effective_weights = weights
+
     # phase[iz, k] = exp(-N_k * ln z_i) = z_i^{-N_k}
     log_z = np.log(z_arr)
     phase = np.exp(-np.outer(log_z, N_nodes))  # (n_z, n_N), complex
-    phase_w = phase * weights[np.newaxis, :]  # (n_z, n_N)
+    phase_w = phase * effective_weights[np.newaxis, :]  # (n_z, n_N)
 
     # grid[comp, iz, imu] = Re( Σ_k phase_w[iz,k] * D_tilde[k, comp, imu] )
     # Reshape D_tilde → (n_N, 3*n_mu), contract, then reshape
