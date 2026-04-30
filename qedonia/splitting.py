@@ -103,9 +103,9 @@ def gamma_matrix(
 
     The DGLAP equation is  dD/d ln μ² = Γ · D,  where
 
-        Γ = ⎡     0          (α/2π) P̃_γc      0       ⎤
+        Γ = ⎡     0          (α/2π) P̃_γc      0         ⎤
             ⎢ (α/2π) P̃_cγ   (αs/2π) P̃_cc   (αs/2π) P̃_cg ⎥
-            ⎣     0          (αs/2π) P̃_gc   (αs/2π) P̃_gg  ⎦
+            ⎣     0         (αs/2π) P̃_gc   (αs/2π) P̃_gg ⎦
 
     Both QED entries carry exactly one power of ec² (already in P̃_γc, P̃_cγ).
 
