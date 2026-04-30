@@ -21,6 +21,7 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
+import scienceplots  # noqa: F401 — registers the style sheets
 
 plt.style.use(["science", "nature"])
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
