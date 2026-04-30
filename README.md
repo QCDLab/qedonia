@@ -8,8 +8,6 @@ QED mixing at every scale step. NRQCD initial conditions at μ₀ = 2m_c are
 provided for the four standard colour-octet/singlet channels. Results can be
 written directly to LHAPDF grid sets.
 
----
-
 ## Physics overview
 
 The fragmentation vector **D** = (D_γ, D_c, D_g) satisfies
@@ -39,8 +37,6 @@ Four NRQCD channels are supported as initial conditions at μ₀ = 2m_c:
 | `'1S08'` | ¹S₀^[8] | δ(1−z) for both c and g |
 | `'3PJ8'` | ³P_J^[8] | δ(1−z) for both c and g |
 
----
-
 ## Installation
 
 ### From source (recommended during development)
@@ -67,8 +63,6 @@ The `[dev]` extra installs `pytest` and `matplotlib` for testing and plotting.
 ```bash
 python -m pytest
 ```
-
----
 
 ## Quick start
 
@@ -130,8 +124,6 @@ ax.legend()
 plt.tight_layout()
 plt.savefig("jpsi_ff_charm.pdf")
 ```
-
----
 
 ## Generating LHAPDF grids
 
@@ -226,8 +218,6 @@ Dg  = ff.xfxQ(21, z, Q) / z
 Dga = ff.xfxQ(22, z, Q) / z
 ```
 
----
-
 ## Lower-level API
 
 ### `evolve_ff_grid` — multi-scale grid in one call
@@ -283,8 +273,6 @@ from qedonia import (
 )
 ```
 
----
-
 ## Default parameters
 
 | Parameter | Default | Meaning |
@@ -297,6 +285,4 @@ from qedonia import (
 | `mellin_c` | 2.0 | Contour offset (right of rightmost pole at N = 1) |
 | `mellin_T` | 60.0 | Contour upper limit |
 | `mellin_n_nodes` | 601 | Trapezoidal quadrature nodes |
-| z grid | 60 log-spaced in [0.05, 0.99] | Default momentum-fraction grid |
-
----
+| `z grid` | 60 log-spaced in [0.05, 0.99] | Default momentum-fraction grid |
