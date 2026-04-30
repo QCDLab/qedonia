@@ -23,11 +23,7 @@ import matplotlib.ticker as ticker
 import numpy as np
 
 plt.style.use(["science", "nature"])
-
-# ── project import ───────────────────────────────────────────────────────────
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
-
-# ── physics inputs ───────────────────────────────────────────────────────────
 
 LDMES: dict[str, float] = {
     "1S1": 1.16,  # ⟨O^{J/ψ}(³S₁^[1])⟩  [GeV³]  color-singlet
@@ -44,16 +40,12 @@ MU_VALUES: list[float] = np.geomspace(3.0, 1e2, 8).tolist()
 # z grid: full kinematic range [1e-4, 0.95]; upper limit avoids endpoint artifacts
 Z_VALUES: np.ndarray = np.geomspace(1e-4, 0.95, 200)
 
-# ── subplot descriptors ───────────────────────────────────────────────────────
-
 _PANELS = [
     # (grid_index,  y-label,                        panel_title)
     (0, r"$z\,D_{\gamma \to J/\!\psi}(z,\mu)$", r"$\gamma \to J/\!\psi$"),
     (1, r"$z\,D_{c \to J/\!\psi}(z,\mu)$", r"$c \to J/\!\psi$"),
     (2, r"$z\,D_{g \to J/\!\psi}(z,\mu)$", r"$g \to J/\!\psi$"),
 ]
-
-# ── plotting ─────────────────────────────────────────────────────────────────
 
 
 def make_figure(output: str) -> None:
@@ -76,8 +68,6 @@ def make_figure(output: str) -> None:
     norm = mcolors.LogNorm(vmin=mu_arr[0], vmax=mu_arr[-1])
     colors = [cmap(norm(mu)) for mu in mu_arr]
 
-    # ── figure layout ────────────────────────────────────────────────────────
-    # Nature double-column width ≈ 6.8 in; three equal panels
     fig, axes = plt.subplots(
         1,
         3,
@@ -94,12 +84,10 @@ def make_figure(output: str) -> None:
 
         ax.axhline(0, color="0.6", lw=0.5, ls="--", zorder=0)
 
-        # x axis: log scale, full kinematic range [1e-4, 1]
         ax.set_xscale("log")
         ax.set_xlim(1e-4, 1)
         ax.set_xlabel(r"$z$")
 
-        # y axis: scientific notation
         sci_fmt = ticker.ScalarFormatter(useMathText=True)
         sci_fmt.set_scientific(True)
         sci_fmt.set_powerlimits((0, 0))
@@ -108,11 +96,9 @@ def make_figure(output: str) -> None:
         ax.set_ylabel(ylabel, labelpad=3)
         ax.set_title(title, pad=3)
 
-        # tight y limits with a small margin
         ymax = np.nanmax(np.abs(zD)) * 1.15
         ax.set_ylim(-0.05 * ymax, ymax)
 
-    # ── shared colorbar ──────────────────────────────────────────────────────
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
     cbar = fig.colorbar(
@@ -129,19 +115,15 @@ def make_figure(output: str) -> None:
     cbar.minorticks_off()
 
     fig.suptitle(
-        r"$J/\psi$ FFs — LO QCD$\,\otimes\,$QED DGLAP (NRQCD ICs, $\mu_0 = 2m_c$)",
+        r"$J/\psi$ FFs — LO QCD$\,\otimes\,$QED DGLAP ($\mu_0 = 2m_c$)",
         y=1.02,
         fontsize=7,
     )
 
-    # ── save ─────────────────────────────────────────────────────────────────
     out = pathlib.Path(output)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, bbox_inches="tight")
     print(f"Saved → {out.resolve()}")
-
-
-# ── CLI ───────────────────────────────────────────────────────────────────────
 
 
 def _parse_args() -> argparse.Namespace:
