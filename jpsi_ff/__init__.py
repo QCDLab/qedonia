@@ -22,7 +22,8 @@ Quick start::
     )
 """
 
-from .runner import evolve_jpsi, evolve_all_channels
+from .runner import evolve_jpsi, evolve_all_channels, evolve_ff_grid
+from .lhapdf_writer import write_lhapdf_set
 from .initial_conditions import initial_vector, CHANNELS, F_gamma, braaten_yuan_moment
 from .splitting import (
     gamma_matrix,
@@ -43,6 +44,8 @@ __all__ = [
     # high-level API
     "evolve_jpsi",
     "evolve_all_channels",
+    "evolve_ff_grid",
+    "write_lhapdf_set",
     # initial conditions
     "initial_vector",
     "CHANNELS",
