@@ -20,7 +20,7 @@ Typical usage
 -------------
 ::
 
-    from jpsi_ff.lhapdf_writer import write_lhapdf_set
+    from qedonia.lhapdf_writer import write_lhapdf_set
 
     write_lhapdf_set(
         name="JPsi_FF_LO",

@@ -8,7 +8,7 @@ import pytest
 from scipy.integrate import quad
 from scipy.special import digamma
 
-from jpsi_ff.initial_conditions import (
+from qedonia.initial_conditions import (
     F_gamma,
     _zz_moment,
     braaten_yuan_moment,

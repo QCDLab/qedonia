@@ -1,4 +1,4 @@
-"""jpsi_ff — LO coupled QCD⊗QED evolution of J/ψ fragmentation functions.
+"""qedonia — LO coupled QCD⊗QED evolution of J/ψ fragmentation functions.
 
 The module evolves the three fragmentation functions D_γ, D_c, D_g to J/ψ
 jointly via the 3×3 anomalous-dimension matrix at leading order in both
@@ -13,7 +13,7 @@ Four NRQCD channels are supported:
 
 Quick start::
 
-    from jpsi_ff import evolve_jpsi, evolve_all_channels
+    from qedonia import evolve_jpsi, evolve_all_channels
 
     z, Dc = evolve_jpsi(
         channel='3S18', ldme=1e-2,

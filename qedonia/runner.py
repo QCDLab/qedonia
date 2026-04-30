@@ -4,7 +4,7 @@ Typical usage
 -------------
 ::
 
-    from jpsi_ff import evolve_jpsi, evolve_all_channels
+    from qedonia import evolve_jpsi, evolve_all_channels
 
     # Evolved charm FF for the dominant ³S₁^[8] channel
     z, Dc = evolve_jpsi(

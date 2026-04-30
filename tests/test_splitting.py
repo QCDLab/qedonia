@@ -8,8 +8,8 @@ import pytest
 from scipy.integrate import quad
 from scipy.special import digamma
 
-from jpsi_ff.splitting import P_cc, P_cg, P_gc, P_gg, P_photon_c, P_c_photon, S1, beta0
-from jpsi_ff.constants import CF, CA, TF, EC2
+from qedonia.splitting import P_cc, P_cg, P_gc, P_gg, P_photon_c, P_c_photon, S1, beta0
+from qedonia.constants import CF, CA, TF, EC2
 
 _GAMMA_E = float(-digamma(1))
 _N_VALUES = [2, 3, 4]

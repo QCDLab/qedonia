@@ -4,9 +4,9 @@ import tempfile
 
 import numpy as np
 
-from jpsi_ff.runner import evolve_ff_grid
-from jpsi_ff.lhapdf_writer import write_lhapdf_set, PIDS, build_block, build_info
-from jpsi_ff.constants import MC_GEV, MU0_OVER_MC
+from qedonia.runner import evolve_ff_grid
+from qedonia.lhapdf_writer import write_lhapdf_set, PIDS, build_block, build_info
+from qedonia.constants import MC_GEV, MU0_OVER_MC
 
 _MC = MC_GEV
 _MU0 = MU0_OVER_MC * _MC
@@ -52,7 +52,7 @@ def test_ff_grid_mu_sorted():
 
 def test_ff_grid_identity_at_initial_scale():
     """Grid at the initial scale must reproduce evolve_jpsi at the same scale."""
-    from jpsi_ff.runner import evolve_jpsi
+    from qedonia.runner import evolve_jpsi
 
     z, mu, grid = evolve_ff_grid(
         _LDMES,

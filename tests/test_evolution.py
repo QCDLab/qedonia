@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from jpsi_ff.evolution import transfer_matrix, evolve_vector
-from jpsi_ff.constants import MC_GEV, MU0_OVER_MC
+from qedonia.evolution import transfer_matrix, evolve_vector
+from qedonia.constants import MC_GEV, MU0_OVER_MC
 
 _MC = MC_GEV
 _MU0 = MU0_OVER_MC * _MC
@@ -29,7 +29,7 @@ def test_transfer_matrix_shape():
 def test_gluon_photon_decoupled():
     """Γ_γg = Γ_gγ = 0 at LO — there is no direct photon↔gluon coupling.
     (Indirect γ←c←g mixing is allowed and expected.)"""
-    from jpsi_ff.splitting import gamma_matrix
+    from qedonia.splitting import gamma_matrix
 
     Gamma = gamma_matrix(_N, as_over_2pi=0.05, aem_over_2pi=1e-4, nf=_NF)
     assert abs(Gamma[0, 2]) < 1e-30, "Direct γ←g coupling must vanish"

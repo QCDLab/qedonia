@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "jpsi-ff"
+name = "qedonia"
 version = "0.1.0"
 description = "LO coupled QCD⊗QED DGLAP evolution of J/ψ fragmentation functions (NRQCD)"
 requires-python = ">=3.10"
@@ -18,7 +18,7 @@ dev = ["pytest", "matplotlib"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["jpsi_ff*"]
+include = ["qedonia*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
