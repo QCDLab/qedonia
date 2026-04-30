@@ -81,7 +81,7 @@ def make_figure(output: str) -> None:
         zD = z_arr[:, np.newaxis] * grid[comp_idx, :, :]  # (n_z, n_mu)
 
         for imu, color in enumerate(colors):
-            ax.plot(z_arr, zD[:, imu], color=color, lw=0.9)
+            ax.plot(z_arr, zD[:, imu], color=color, lw=0.6)
 
         ax.axhline(0, color="0.6", lw=0.5, ls="--", zorder=0)
 
@@ -123,7 +123,7 @@ def make_figure(output: str) -> None:
 
     out = pathlib.Path(output)
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out, bbox_inches="tight")
+    fig.savefig(out, bbox_inches="tight", dpi=450)
     print(f"Saved → {out.resolve()}")
 
 
