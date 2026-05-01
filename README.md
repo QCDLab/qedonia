@@ -236,14 +236,16 @@ from qedonia import (
 
 ## Default parameters
 
-| Parameter | Default | Meaning |
-|-----------|---------|---------|
-| `mc` | 1.5 GeV | Charm quark mass |
-| `mu0_over_mc` | 2.0 | μ₀ / mc (initial scale ratio) |
-| `alpha_em` | 1/133 | QED coupling (fixed) |
-| `nf` | 4 | Active flavours (u, d, s, c) |
-| `n_steps` | 50 | Evolution integration steps |
-| `mellin_c` | 2.0 | Contour offset (right of rightmost pole at N = 1) |
-| `mellin_T` | 60.0 | Contour upper limit |
-| `mellin_n_nodes` | 601 | Trapezoidal quadrature nodes |
-| `z grid` | 60 log-spaced in [0.05, 0.99] | Default momentum-fraction grid |
+These are the default parameters if not user-input values are provided.
+
+```yaml
+mc: 1.5 GeV                # Charm quark mass
+mu0_over_mc: 2.0           # μ₀ / mc (initial scale ratio)
+alpha_em: 1/133            # QED coupling (fixed)
+nf: 4                      # Active flavours (u, d, s, c)
+n_steps: 50                # Evolution integration steps
+mellin_c: 2.0              # Contour offset (right of rightmost pole at N = 1)
+mellin_T: 60.0             # Contour upper limit
+mellin_n_nodes: 601        # Trapezoidal quadrature nodes
+z_grid: 60 log-spaced in [0.05, 0.99]  # Default momentum-fraction grid
+```
