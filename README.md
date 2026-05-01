@@ -1,41 +1,12 @@
-# qedonia
+<h1 align="center">QEDonia</h1>
 
-**LO coupled QCD⊗QED DGLAP evolution of quarkonia fragmentation functions**
-
-`qedonia` solves the leading-order DGLAP evolution equations for the
-three-component system (γ, c, g) → J/ψ in Mellin space, coupling QCD and
-QED mixing at every scale step. NRQCD initial conditions at μ₀ = 2m_c are
-provided for the four standard colour-octet/singlet channels. Results can be
-written directly to LHAPDF grid sets.
-
-## Physics overview
-
-The fragmentation vector **D** = (D_γ, D_c, D_g) satisfies
-
-```text
-d D / d ln μ²  =  Γ(N, μ²) · D
-```
-
-where the 3×3 anomalous-dimension matrix at LO reads
-
-```text
-Γ = ⎡     0          (α/2π) P̃_γc       0         ⎤
-    ⎢ (α/2π) P̃_cγ   (αs/2π) P̃_cc   (αs/2π) P̃_cg  ⎥
-    ⎣     0         (αs/2π) P̃_gc   (αs/2π) P̃_gg  ⎦
-```
-
-The evolution operator is computed via the path-ordered iterate-exact method
-(matrix exponential at each step midpoint). Mellin inversion uses a
-straight-line contour N = c + it with the trapezoidal rule.
-
-Four NRQCD channels are supported as initial conditions at μ₀ = 2m_c:
-
-| Key | Channel | IC type |
-|-----|---------|---------|
-| `'1S1'`  | ³S₁^[1] | Braaten–Yuan (non-trivial z-shape for c; zero for g) |
-| `'3S18'` | ³S₁^[8] | δ(1−z) for both c and g |
-| `'1S08'` | ¹S₀^[8] | δ(1−z) for both c and g |
-| `'3PJ8'` | ³P_J^[8] | δ(1−z) for both c and g |
+<p align="justify">
+    QEDonia solves the leading-order DGLAP evolution equations for the
+    three-component system (γ, c, g) → J/ψ in Mellin space, coupling
+    QCD and QED mixing at every scale step. NRQCD initial conditions at
+    μ₀ = 2m_c are provided for the four standard colour-octet/singlet
+    channels. Results can be written directly to LHAPDF grid sets.
+</p>
 
 ## Installation
 
@@ -47,18 +18,8 @@ cd qedonia
 pip install -e ".[dev]"
 ```
 
-The `[dev]` extra installs `pytest` and `matplotlib` for testing and plotting.
-
-### Runtime dependencies
-
-| Package | Version |
-|---------|---------|
-| Python  | ≥ 3.10  |
-| NumPy   | ≥ 1.24  |
-| SciPy   | ≥ 1.10  |
-| PyYAML  | ≥ 6.0   |
-
-### Verify the installation
+To verify that everything has been installed correctly, run the following
+command:
 
 ```bash
 python -m pytest
