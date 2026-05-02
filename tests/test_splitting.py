@@ -82,14 +82,17 @@ def test_photon_shape_no_ln(N):
 
 @pytest.mark.parametrize("N", _N_VALUES)
 def test_Pqq(N):
-    """P̃_cc(N) = CF [3 - 2 S₁ + 1/(N(N+1))]."""
+    """P̃_cc(N) = CF [3/2 - 2 S₁ + 1/(N(N+1))].
+
+    ∫(z^{N-1}-1)(1+z²)/(1-z) dz already equals P̃_qq(N)/CF exactly because the
+    3/2 δ(1-z) piece and the -3/2 correction from the plus-prescription cancel.
+    """
     val, _ = quad(
         lambda z: CF * (z ** (N - 1) - 1.0) * (1.0 + z**2) / (1.0 - z),
         0.0,
         1.0 - 1e-10,
         limit=200,
     )
-    val += CF * 1.5  # ∫ z^{N-1} CF·3/2·δ(1-z) dz = CF·3/2
     assert abs(val - P_cc(N).real) < 1e-7
 
 

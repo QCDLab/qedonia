@@ -199,9 +199,9 @@ def d_charm(
     zz = _zz_moment(N)
 
     if channel == "1S1":
-        # eq. Mc_1S1: (16 αs²)/(27 mc³) · B(N)   (Braaten–Yuan)
+        # eq. Mc_1S1: (16 αs²)/(729 mc³) · B(N)   (Braaten–Yuan / Cho-Leibovich)
         B = braaten_yuan_moment(N)
-        return (16.0 * alpha_s_ref**2) / (27.0 * mc**3) * B
+        return (16.0 * alpha_s_ref**2) / (729.0 * mc**3) * B
     elif channel == "3S18":
         # eq. Mc_3S18: (π αs)/(6 mc³)   (constant in N, from δ(1-z))
         return (np.pi * alpha_s_ref) / (6.0 * mc**3) + 0j

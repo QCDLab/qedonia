@@ -9,7 +9,7 @@ basis vector is  (D_γ, D_c, D_g) → indices (0, 1, 2).
 
 Splitting-function moments (eq. MPqq – MPcharm_qed of notes):
 
-    P̃_cc(N)  = CF  [3 − 2 S₁(N) + 1/(N(N+1))]
+    P̃_cc(N)  = CF  [3/2 − 2 S₁(N) + 1/(N(N+1))]
     P̃_cg(N)  = CF  [2/(N−1) − 2/N + 1/(N+1)]
     P̃_gc(N)  = TF  [1/N − 2/(N+1) + 2/(N+2)]          ← single flavour (charm only)
     P̃_gg(N)  = 2CA [1 − S₁(N) + 1/(N(N−1)) + 1/((N+1)(N+2))] + β₀/2
@@ -46,8 +46,8 @@ def beta0(nf: int = NF) -> float:
 
 
 def P_cc(N: complex) -> complex:
-    r"""P̃_{q→q}(N) = CF [3 − 2 S₁(N) + 1/(N(N+1))].  (eq. MPqq)"""
-    return CF * (3.0 - 2.0 * S1(N) + 1.0 / (N * (N + 1.0)))
+    r"""P̃_{q→q}(N) = CF [3/2 − 2 S₁(N) + 1/(N(N+1))].  (eq. MPqq)"""
+    return CF * (1.5 - 2.0 * S1(N) + 1.0 / (N * (N + 1.0)))
 
 
 def P_cg(N: complex) -> complex:
@@ -126,16 +126,17 @@ def gamma_matrix(
     """
     Gamma = np.zeros((3, 3), dtype=complex)
 
-    # Row 0: photon sourced by charm via QED
-    Gamma[0, 1] = aem_over_2pi * P_photon_c(N)  # (α/2π) ec² [...]
+    # Row 0: photon sourced by charm via QED  (c→γ, CF-structure)
+    Gamma[0, 1] = aem_over_2pi * P_c_photon(N)
 
-    # Row 1: charm sourced by photon (QED) + charm/gluon (QCD)
-    Gamma[1, 0] = aem_over_2pi * P_c_photon(N)  # (α/2π) ec² [...]
+    # Row 1: charm sourced by photon (QED, γ→cc̄, TF-structure)
+    #         + charm self-coupling + charm sourced by gluon (g→cc̄, TF-structure)
+    Gamma[1, 0] = aem_over_2pi * P_photon_c(N)
     Gamma[1, 1] = as_over_2pi * P_cc(N)
-    Gamma[1, 2] = as_over_2pi * P_cg(N)
+    Gamma[1, 2] = as_over_2pi * P_gc(N)
 
-    # Row 2: gluon sourced by charm (QCD)
-    Gamma[2, 1] = as_over_2pi * P_gc(N)
+    # Row 2: gluon sourced by charm (c→g, CF-structure)
+    Gamma[2, 1] = as_over_2pi * P_cg(N)
     Gamma[2, 2] = as_over_2pi * P_gg(N, nf)
 
     return Gamma
