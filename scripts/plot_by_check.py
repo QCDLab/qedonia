@@ -163,13 +163,140 @@ def make_figure(output: str) -> None:
     print(f"Saved → {out.resolve()}")
 
 
+# -----------------------------------------------------
+# Integrated-rate comparison
+# -----------------------------------------------------
+
+# (label, α_s, m_c [GeV], colour)
+_SETUPS: list[tuple[str, float, float, str]] = [
+    (r"$\alpha_s{=}0.24$", 0.24, 1.5, "#2ca02c"),
+    (r"central ($\alpha_s{=}0.26$, $m_c{=}1.5\,\mathrm{GeV}$)", 0.26, 1.5, "#1f77b4"),
+    (r"$\alpha_s{=}0.28$", 0.28, 1.5, "#2ca02c"),
+    (r"$m_c{=}1.4\,\mathrm{GeV}$", 0.26, 1.4, "#ff7f0e"),
+    (r"$m_c{=}1.6\,\mathrm{GeV}$", 0.26, 1.6, "#ff7f0e"),
+]
+
+_LDME_DELTA: float = 0.20  # ± GeV³ — MC fit uncertainty on ⟨O(³S₁^[1])⟩
+_SESSION_REF: float = 1.6e-5  # value quoted in the debugging session
+_SESSION_REF_UNC: float = 0.50  # assumed ±50 % (inputs unknown)
+
+
+def _integral_at_mz(alpha_s_ref: float, mc: float, z_dense: np.ndarray) -> float:
+    """Return ∫₀¹ D_c(z, 91 GeV) dz for a single (αs, mc) setup."""
+    _, _, grid = evolve_ff_grid(
+        ldmes={"1S1": LDME_1S1},
+        mu_from=2.0 * mc,
+        mu_values=[91.0],
+        alpha_s_ref=alpha_s_ref,
+        z_values=z_dense,
+        mc=mc,
+        n_steps=50,
+        mellin_T=200,
+        mellin_n_nodes=2001,
+        lanczos=True,
+        lanczos_order=2,
+    )
+    return float(np.trapezoid(grid[1, :, 0], z_dense))
+
+
+def make_integral_comparison_figure(output: str) -> None:
+    r"""Forest plot of ∫₀¹ D_c dz at μ=91 GeV across input-parameter variations.
+
+    Points represent different (αs, mc) setups; error bars show the MC LDME
+    uncertainty  Δ⟨O(³S₁^[1])⟩ = ±0.20 GeV³  propagated linearly.
+    The session reference value 1.6×10⁻⁵ is shown in red for comparison.
+    """
+    out = pathlib.Path(output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    z_dense = np.linspace(0.0, 1.0, 2001)[1:-1]
+    ldme_frac = _LDME_DELTA / LDME_1S1  # fractional LDME uncertainty
+
+    labels, vals, errs, colors = [], [], [], []
+    for label, a_s, mc_val, color in _SETUPS:
+        print(f"  αs={a_s}, mc={mc_val} GeV …")
+        v = _integral_at_mz(a_s, mc_val, z_dense)
+        labels.append(label)
+        vals.append(v)
+        errs.append(v * ldme_frac)
+        colors.append(color)
+
+    # session reference (unknown inputs → generous ±50 %)
+    labels.append(r"session ref.\ ($1.6\!\times\!10^{-5}$, inputs unknown)")
+    vals.append(_SESSION_REF)
+    errs.append(_SESSION_REF * _SESSION_REF_UNC)
+    colors.append("#d62728")
+
+    fig, ax = plt.subplots(figsize=(5.6, 3.2))
+
+    y_pos = np.arange(len(labels), dtype=float)[::-1]
+
+    for y, val, err, col in zip(y_pos, vals, errs, colors):
+        ax.errorbar(
+            val,
+            y,
+            xerr=err,
+            fmt="o",
+            color=col,
+            markersize=3.5,
+            capsize=2.5,
+            lw=0.8,
+            elinewidth=0.8,
+        )
+
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(labels, fontsize=5.5)
+    ax.set_xscale("log")
+    ax.set_xlabel(
+        r"$\int_0^1 D_{c\to J/\!\psi}^{{}^3\!S_1^{[1]}}(z,\,91\,\mathrm{GeV})\,dz$",
+        fontsize=7,
+    )
+
+    central_val = vals[1]  # αs=0.26, mc=1.5
+    ax.axvline(central_val, color="#1f77b4", lw=0.5, ls=":", alpha=0.6)
+    ax.axvline(_SESSION_REF, color="#d62728", lw=0.5, ls=":", alpha=0.6)
+
+    ax.annotate(
+        "central",
+        xy=(central_val, y_pos[-1] - 0.55),
+        fontsize=4.5,
+        color="#1f77b4",
+        ha="center",
+    )
+    ax.annotate(
+        "ref.",
+        xy=(_SESSION_REF, y_pos[-1] - 0.55),
+        fontsize=4.5,
+        color="#d62728",
+        ha="center",
+    )
+
+    fig.suptitle(
+        r"$\int D_c\,dz$ at $M_Z$  —  1S1 channel, LO"
+        "\n"
+        r"error bars: $\Delta\langle\mathcal{O}\rangle = \pm 0.20\,\mathrm{GeV}^3$ (MC fit unc.)",
+        y=1.02,
+        fontsize=6.5,
+    )
+
+    fig.tight_layout()
+    fig.savefig(out, bbox_inches="tight", dpi=450)
+    print(f"Saved → {out.resolve()}")
+
+
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
         "-o",
         "--output",
         default="figs/by_check.pdf",
-        help="Output path (default: figs/by_check.pdf)",
+        help="Output path for the BY IC check figure (default: figs/by_check.pdf)",
+    )
+    p.add_argument(
+        "--output-integral",
+        default="figs/integral_comparison.pdf",
+        help="Output path for the ∫D_c dz comparison figure "
+        "(default: figs/integral_comparison.pdf)",
     )
     return p.parse_args()
 
@@ -177,3 +304,7 @@ def _parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = _parse_args()
     make_figure(args.output)
+    print()
+    print("─" * 60)
+    print("Computing ∫D_c dz comparison figure …")
+    make_integral_comparison_figure(args.output_integral)
