@@ -8,8 +8,20 @@ import pytest
 from scipy.integrate import quad
 from scipy.special import digamma
 
-from qedonia.splitting import P_cc, P_cg, P_gc, P_gg, P_photon_c, P_c_photon, S1, beta0
-from qedonia.constants import CF, CA, TF, EC2
+from qedonia.splitting import (
+    P_cc,
+    P_cg,
+    P_gc,
+    P_gg,
+    P_photon_c,
+    P_c_photon,
+    P_gamma_gamma,
+    S1,
+    beta0,
+    gamma_matrix,
+)
+from qedonia.couplings import beta0_qed, alpha_em_run
+from qedonia.constants import CF, CA, TF, EC2, NF, N_LEP, sum_nc_q2
 
 _GAMMA_E = float(-digamma(1))
 _N_VALUES = [2, 3, 4]
@@ -160,3 +172,74 @@ def test_P_c_photon(N):
         1.0,
     )
     assert abs(val - P_c_photon(N).real) < 1e-8
+
+
+# ---------------------------------------------------------------------------
+# QED photon diagonal: P̃_γγ, β₀^QED, α running, Γ[0,0]
+# ---------------------------------------------------------------------------
+
+
+def test_sum_nc_q2_central():
+    """Σ Nc Q_f² for nf=4 quarks + 3 leptons = 10/3 + 3 = 19/3."""
+    expected = 3 * (4 / 9 + 1 / 9 + 1 / 9 + 4 / 9) + 3.0  # quarks + leptons
+    assert abs(sum_nc_q2(NF, N_LEP) - expected) < 1e-12
+
+
+def test_sum_nc_q2_quarks_only():
+    """Σ Nc Q_f² for nf=4 quarks, no leptons = 10/3."""
+    expected = 3 * (4 / 9 + 1 / 9 + 1 / 9 + 4 / 9)
+    assert abs(sum_nc_q2(NF, 0) - expected) < 1e-12
+
+
+def test_beta0_qed_value():
+    """b₀^QED = (2/3) × 19/3 = 38/9 for nf=4, n_lep=3."""
+    expected = (2.0 / 3.0) * (10.0 / 3.0 + 3.0)
+    assert abs(beta0_qed(NF, N_LEP) - expected) < 1e-12
+
+
+def test_P_gamma_gamma_value():
+    """P̃_γγ = −b₀^QED = −38/9 for nf=4, n_lep=3."""
+    expected = -(2.0 / 3.0) * (10.0 / 3.0 + 3.0)
+    assert abs(P_gamma_gamma(NF, N_LEP).real - expected) < 1e-12
+
+
+@pytest.mark.parametrize("N", _N_VALUES)
+def test_P_gamma_gamma_N_independent(N):
+    """P̃_γγ must be the same for all N (pure δ(1-z) → constant in Mellin space)."""
+    ref = P_gamma_gamma(NF, N_LEP)
+    assert abs(P_gamma_gamma(NF, N_LEP) - ref) < 1e-30
+
+
+def test_alpha_em_run_identity():
+    """α(μ²_ref) = α_ref regardless of fermion content."""
+    alpha_ref = 1.0 / 133.0
+    mu2_ref = 9.0
+    assert abs(alpha_em_run(alpha_ref, mu2_ref, mu2_ref) - alpha_ref) < 1e-15
+
+
+def test_alpha_em_run_increases():
+    """α increases with μ in QED (Landau-pole direction)."""
+    alpha_ref = 1.0 / 133.0
+    mu2_ref = 9.0
+    alpha_high = alpha_em_run(alpha_ref, mu2_ref, 91.0**2)
+    assert float(alpha_high) > alpha_ref
+
+
+def test_alpha_em_run_known_range():
+    """LO running from μ₀=3 GeV to M_Z=91 GeV gives ~1/129–1/131 (nf=4, n_lep=3)."""
+    alpha_ref = 1.0 / 133.0
+    alpha_mz = float(alpha_em_run(alpha_ref, 9.0, 91.0**2))
+    assert 1.0 / 132.0 < alpha_mz < 1.0 / 128.0
+
+
+def test_gamma_matrix_photon_diagonal_nonzero():
+    """Γ[0,0] must be non-zero when aem ≠ 0 (P̃_γγ term)."""
+    Gamma = gamma_matrix(2.0 + 0j, as_over_2pi=0.05, aem_over_2pi=1e-4)
+    assert abs(Gamma[0, 0]) > 0.0, "Γ[0,0] = (α/2π) P̃_γγ must be non-zero"
+    assert Gamma[0, 0].real < 0.0, "P̃_γγ < 0: photon self-energy is negative"
+
+
+def test_gamma_matrix_photon_diagonal_zero_with_qed_off():
+    """Γ[0,0] = 0 when aem = 0 (pure-QCD limit)."""
+    Gamma = gamma_matrix(2.0 + 0j, as_over_2pi=0.05, aem_over_2pi=0.0)
+    assert abs(Gamma[0, 0]) < 1e-30

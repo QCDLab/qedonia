@@ -33,10 +33,11 @@ from .splitting import (
     P_gg,
     P_photon_c,
     P_c_photon,
+    P_gamma_gamma,
     S1,
     beta0,
 )
-from .couplings import alpha_s, as_over_2pi
+from .couplings import alpha_s, as_over_2pi, alpha_em_run, beta0_qed
 from .evolution import transfer_matrix, evolve_vector
 from .mellin import contour_nodes, invert_mellin
 
@@ -59,11 +60,14 @@ __all__ = [
     "P_gg",
     "P_photon_c",
     "P_c_photon",
+    "P_gamma_gamma",
     "S1",
     "beta0",
     # couplings
     "alpha_s",
     "as_over_2pi",
+    "alpha_em_run",
+    "beta0_qed",
     # evolution
     "transfer_matrix",
     "evolve_vector",

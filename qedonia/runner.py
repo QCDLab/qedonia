@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .constants import MC_GEV, MU0_OVER_MC, NF, ALPHA_EM
+from .constants import MC_GEV, MU0_OVER_MC, NF, N_LEP, ALPHA_EM
 from .initial_conditions import initial_vector, CHANNELS
 from .evolution import transfer_matrix
 from .mellin import contour_nodes, invert_mellin, DEFAULT_C, DEFAULT_T, DEFAULT_N_NODES
@@ -52,7 +52,9 @@ def evolve_jpsi(
     mu0_over_mc: float = MU0_OVER_MC,
     alpha_em: float = ALPHA_EM,
     nf: int = NF,
+    n_lep: int = N_LEP,
     n_steps: int = 50,
+    run_alpha_em: bool = False,
     mellin_c: float = DEFAULT_C,
     mellin_T: float = DEFAULT_T,
     mellin_n_nodes: int = DEFAULT_N_NODES,
@@ -90,11 +92,15 @@ def evolve_jpsi(
     mu0_over_mc : float
         Ratio μ₀/mc used in the NRQCD initial conditions.
     alpha_em : float
-        QED coupling (fixed).
+        QED coupling at ``mu_from`` (reference for running, or fixed value).
     nf : int
-        Number of active flavors.
+        Number of active quark flavors.
+    n_lep : int
+        Number of active unit-charge leptons (default 3: e, μ, τ).
     n_steps : int
         Path-ordered integration steps inside the transfer matrix.
+    run_alpha_em : bool
+        If True, run α via the one-loop QED RGE instead of keeping it fixed.
     mellin_c, mellin_T, mellin_n_nodes :
         Mellin inversion contour parameters.
 
@@ -125,7 +131,16 @@ def evolve_jpsi(
     for k, N in enumerate(N_nodes):
         D0 = initial_vector(N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc)
         E = transfer_matrix(
-            N, mu2_from, mu2_to, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps
+            N,
+            mu2_from,
+            mu2_to,
+            alpha_s_ref,
+            mu2_ref,
+            alpha_em,
+            nf,
+            n_lep,
+            n_steps,
+            run_alpha_em,
         )
         D_tilde[k] = (E @ D0)[comp_idx]
 
@@ -192,14 +207,17 @@ def evolve_ff_grid(
     mu0_over_mc: float = MU0_OVER_MC,
     alpha_em: float = ALPHA_EM,
     nf: int = NF,
+    n_lep: int = N_LEP,
     n_steps: int = 50,
+    run_alpha_em: bool = False,
     mellin_c: float = DEFAULT_C,
     mellin_T: float = DEFAULT_T,
     mellin_n_nodes: int = DEFAULT_N_NODES,
     lanczos: bool = False,
     lanczos_order: int = 1,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    r"""Compute the evolved J/ψ FF grid for all three components at multiple scales.
+    r"""Compute the evolved J/ψ FF grid for all three components at multiple
+    scales.
 
     The algorithm is optimised for a multi-Q run:
 
@@ -225,7 +243,7 @@ def evolve_ff_grid(
     z_values : array_like or None
         Momentum-fraction grid.  Defaults to 60 log-spaced points in
         [0.05, 0.99].
-    mc, mu0_over_mc, alpha_em, nf, n_steps :
+    mc, mu0_over_mc, alpha_em, nf, n_lep, n_steps, run_alpha_em :
         Same meaning as in :func:`evolve_jpsi`.
     mellin_c, mellin_T, mellin_n_nodes :
         Mellin contour parameters.
@@ -268,7 +286,6 @@ def evolve_ff_grid(
     n_N = len(N_nodes)
     n_mu = len(mu_arr)
 
-    # --- Step 1: build the LDME-weighted IC vector at each contour node ---
     D0_N = np.zeros((n_N, 3), dtype=complex)
     for channel in CHANNELS:
         ldme = ldmes.get(channel, 0.0)
@@ -279,7 +296,6 @@ def evolve_ff_grid(
                 N, channel, alpha_s_ref, alpha_em, mc, mu0_over_mc
             )
 
-    # --- Step 2: evolve to all target scales, chaining E matrices ---
     # D_tilde[k, comp, imu] = (E(N_k; Q₀²→Qᵢ²) @ D̃₀(N_k))[comp]
     D_tilde = np.empty((n_N, 3, n_mu), dtype=complex)
     for k, N in enumerate(N_nodes):
@@ -289,19 +305,31 @@ def evolve_ff_grid(
             # extend the chain by one segment
             E = (
                 transfer_matrix(
-                    N, mu2_prev, mu2, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps
+                    N,
+                    mu2_prev,
+                    mu2,
+                    alpha_s_ref,
+                    mu2_ref,
+                    alpha_em,
+                    nf,
+                    n_lep,
+                    n_steps,
+                    run_alpha_em,
                 )
                 @ E
             )
             D_tilde[k, :, i] = E @ D0_N[k]
             mu2_prev = mu2
 
-    # --- Step 3: vectorised Mellin inversion ---
     # Optionally damp the weights with the Lanczos sigma factor
     # σ(t) = sinc(t/T) suppresses Gibbs ringing from flat (δ-function) ICs
     if lanczos:
         t_vals = np.imag(N_nodes)
-        sigma = np.where(t_vals > 0, np.sinc(t_vals / mellin_T) ** lanczos_order, 1.0)
+        sigma = np.where(
+            t_vals > 0,
+            np.sinc(t_vals / mellin_T) ** lanczos_order,
+            1.0,
+        )
         effective_weights = weights * sigma
     else:
         effective_weights = weights
@@ -315,6 +343,6 @@ def evolve_ff_grid(
     # Reshape D_tilde → (n_N, 3*n_mu), contract, then reshape
     D_flat = D_tilde.reshape(n_N, 3 * n_mu)  # (n_N, 3*n_mu)
     grid_flat = np.real(phase_w @ D_flat)  # (n_z, 3*n_mu)
-    grid = grid_flat.reshape(len(z_arr), 3, n_mu).transpose(1, 0, 2)  # (3, n_z, n_mu)
+    grid = grid_flat.reshape(len(z_arr), 3, n_mu).transpose(1, 0, 2)
 
     return z_arr, mu_arr, grid

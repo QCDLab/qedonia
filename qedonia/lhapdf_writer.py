@@ -40,7 +40,7 @@ import re
 import numpy as np
 import yaml
 
-from .constants import MC_GEV, MU0_OVER_MC, NF, ALPHA_EM
+from .constants import MC_GEV, MU0_OVER_MC, NF, N_LEP, ALPHA_EM
 from .couplings import alpha_s as _alpha_s
 from .runner import (
     evolve_ff_grid,
@@ -50,18 +50,9 @@ from .runner import (
     DEFAULT_N_NODES,
 )
 
-# ---------------------------------------------------------------------------
-# LHAPDF PID convention for the three components
-# ---------------------------------------------------------------------------
-
 #: PIDs written to the grid, in component order [γ, c, g].
 PIDS: list[int] = [22, 4, 21]
 _COMP_OF_PID: dict[int, int] = {22: 0, 4: 1, 21: 2}
-
-
-# ---------------------------------------------------------------------------
-# Low-level LHAPDF format writers  (vendored from ekobox.genpdf.export)
-# ---------------------------------------------------------------------------
 
 
 def _fmt_list(values, fmt: str = "%.6e") -> str:
@@ -95,7 +86,6 @@ def _write_info(path: pathlib.Path, info: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     stream = io.StringIO()
     yaml.safe_dump(info, stream, default_flow_style=True, width=100000, line_break="\n")
-    # Insert newlines before each top-level key so the file is human-readable
     cnt = re.sub(
         r", ([A-Za-z_]+\d?):(?=[ \[])", r"\n\1:", stream.getvalue().strip()[1:-1]
     )
@@ -141,7 +131,6 @@ def build_info(
         Optional metadata strings.
     """
     mu2_from = mu_from**2
-    # Build αs interpolation table covering the full Q range
     q_nodes = sorted({mu_from} | set(mu_values))
     as_vals = [float(_alpha_s(alpha_s_ref, mu2_from, q**2)) for q in q_nodes]
 
@@ -171,11 +160,6 @@ def build_info(
         "AlphaS_Qs": q_nodes,
         "AlphaS_Vals": as_vals,
     }
-
-
-# ---------------------------------------------------------------------------
-# Block builder
-# ---------------------------------------------------------------------------
 
 
 def build_block(
@@ -208,7 +192,8 @@ def build_block(
         for imu in range(n_mu):
             for jp, pid in enumerate(PIDS):
                 comp = _COMP_OF_PID[pid]
-                data[row, jp] = z * grid[comp, iz, imu]  # store z·D(z,Q)
+                # store z·D(z,Q)
+                data[row, jp] = z * grid[comp, iz, imu]
             row += 1
     return {
         "xgrid": z_arr.tolist(),
@@ -216,11 +201,6 @@ def build_block(
         "pids": PIDS,
         "data": data,
     }
-
-
-# ---------------------------------------------------------------------------
-# Main public entry point
-# ---------------------------------------------------------------------------
 
 
 def write_lhapdf_set(
@@ -235,7 +215,9 @@ def write_lhapdf_set(
     mu0_over_mc: float = MU0_OVER_MC,
     alpha_em: float = ALPHA_EM,
     nf: int = NF,
+    n_lep: int = N_LEP,
     n_steps: int = 50,
+    run_alpha_em: bool = False,
     authors: str = "",
     description: str = "",
     mellin_c: float = DEFAULT_C,
@@ -273,9 +255,13 @@ def write_lhapdf_set(
     mu0_over_mc :
         Ratio μ₀/mc (used in NRQCD ICs).
     alpha_em :
-        QED coupling (fixed throughout the evolution).
+        QED coupling at ``mu_from`` (reference for running, or fixed value).
     nf :
-        Number of active flavours.
+        Number of active quark flavors.
+    n_lep :
+        Number of active unit-charge leptons (default 3: e, μ, τ).
+    run_alpha_em :
+        If True, run α via the one-loop QED RGE.
     n_steps :
         Integration steps inside the transfer matrix.
     authors, description :
@@ -304,13 +290,14 @@ def write_lhapdf_set(
         mu0_over_mc=mu0_over_mc,
         alpha_em=alpha_em,
         nf=nf,
+        n_lep=n_lep,
         n_steps=n_steps,
+        run_alpha_em=run_alpha_em,
         mellin_c=mellin_c,
         mellin_T=mellin_T,
         mellin_n_nodes=mellin_n_nodes,
     )
 
-    # Build LHAPDF structures
     info = build_info(
         set_name=name,
         z_values=z_out.tolist(),
@@ -323,7 +310,6 @@ def write_lhapdf_set(
     )
     block = build_block(z_out, mu_out, grid)
 
-    # Write to disk
     target = pathlib.Path(output_dir).resolve() / name
     _write_info(target / f"{name}.info", info)
     _write_dat(target / f"{name}_0000.dat", member=0, blocks=[block])

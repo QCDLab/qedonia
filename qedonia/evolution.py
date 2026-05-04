@@ -18,8 +18,8 @@ import numpy as np
 from scipy.linalg import expm
 
 from .splitting import gamma_matrix
-from .couplings import as_over_2pi
-from .constants import NF, ALPHA_EM
+from .couplings import as_over_2pi, alpha_em_run
+from .constants import NF, N_LEP, ALPHA_EM
 
 
 def transfer_matrix(
@@ -30,7 +30,9 @@ def transfer_matrix(
     mu2_ref: float,
     alpha_em: float = ALPHA_EM,
     nf: int = NF,
+    n_lep: int = N_LEP,
     n_steps: int = 50,
+    run_alpha_em: bool = False,
 ) -> np.ndarray:
     r"""Compute the 3×3 transfer matrix  E(N; μ²_from → μ²_to).
 
@@ -49,12 +51,20 @@ def transfer_matrix(
     mu2_ref : float
         Reference scale for the coupling running [GeV²].
     alpha_em : float
-        QED coupling (kept fixed).
+        QED coupling at ``mu2_ref``.  Used as a fixed value when
+        ``run_alpha_em=False``; used as the reference for LO running
+        when ``run_alpha_em=True``.
     nf : int
-        Number of active flavors.
+        Number of active quark flavors.
+    n_lep : int
+        Number of active unit-charge leptons (default 3: e, μ, τ).
+        Used in P̃_γγ and, when ``run_alpha_em=True``, in b₀^QED.
     n_steps : int
         Number of integration steps.  50 is accurate to < 0.1 % for a
         decade of evolution at LO.
+    run_alpha_em : bool
+        If True, compute α(μ²_mid) at each step via the one-loop QED RGE
+        instead of keeping α fixed.
 
     Returns
     -------
@@ -64,14 +74,23 @@ def transfer_matrix(
     t_from = np.log(mu2_from)
     t_to = np.log(mu2_to)
     dt = (t_to - t_from) / n_steps
-    aem_2pi = alpha_em / (2.0 * np.pi)
 
     E = np.eye(3, dtype=complex)
     for i in range(n_steps):
         t_mid = t_from + (i + 0.5) * dt
         mu2_mid = np.exp(t_mid)
         a_s_2pi = as_over_2pi(alpha_s_ref, mu2_ref, mu2_mid, nf)
-        Gam = gamma_matrix(N, float(a_s_2pi), aem_2pi, nf)
+        if run_alpha_em:
+            aem_mid = alpha_em_run(alpha_em, mu2_ref, mu2_mid, nf, n_lep)
+        else:
+            aem_mid = alpha_em
+        Gam = gamma_matrix(
+            N,
+            float(a_s_2pi),
+            float(aem_mid / (2.0 * np.pi)),
+            nf,
+            n_lep,
+        )
         E = expm(Gam * dt) @ E
 
     return E
@@ -86,7 +105,9 @@ def evolve_vector(
     mu2_ref: float,
     alpha_em: float = ALPHA_EM,
     nf: int = NF,
+    n_lep: int = N_LEP,
     n_steps: int = 50,
+    run_alpha_em: bool = False,
 ) -> np.ndarray:
     r"""Evolve the initial 3-vector  D̃(N, μ₀)  to scale μ².
 
@@ -104,6 +125,15 @@ def evolve_vector(
         Evolved vector at ``mu2_to``.
     """
     E = transfer_matrix(
-        N, mu2_from, mu2_to, alpha_s_ref, mu2_ref, alpha_em, nf, n_steps
+        N,
+        mu2_from,
+        mu2_to,
+        alpha_s_ref,
+        mu2_ref,
+        alpha_em,
+        nf,
+        n_lep,
+        n_steps,
+        run_alpha_em,
     )
     return E @ np.asarray(D0, dtype=complex)
