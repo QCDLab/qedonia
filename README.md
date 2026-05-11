@@ -15,14 +15,14 @@
 ```bash
 git clone git@github.com:QCDLab/qedonia.git
 cd qedonia
-pip install -e ".[dev]"
+uv sync
 ```
 
 To verify that everything has been installed correctly, run the following
 command:
 
 ```bash
-python -m pytest
+uv run pytest
 ```
 
 ## Quick start
